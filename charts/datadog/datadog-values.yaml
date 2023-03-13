@@ -1,0 +1,72 @@
+targetSystem: "linux"
+
+datadog:
+  # datadog.apiKey -- Your Datadog API key
+
+  ## ref: https://app.datadoghq.com/account/settings#agent/kubernetes
+  apiKey:  # <DATADOG_API_KEY>
+  ## If you are using clusterAgent.metricsProvider.enabled = true, you must set
+  ## a Datadog application key for read access to your metrics.
+  appKey:  # <DATADOG_APP_KEY>
+  orchestratorExplorer:
+    enabled: true
+  clusterName: <CLUSTER_NAME>
+    tags: [ ]
+    kubelet:
+      host:
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+      hostCAPath: /etc/kubernetes/certs/kubeletserver.crt
+      tlsVerify: false
+    logs:
+      enabled: false
+      containerCollectAll: false
+      containerCollectUsingFiles: false
+    apm:
+      portEnabled: true
+      socketPath: /var/run/datadog/apm.socket
+      hostSocketPath: /var/run/datadog/
+    processAgent:
+      enabled: true
+      processCollection: false
+    systemProbe:
+      enableTCPQueueLength: false
+      enableOOMKill: true
+      collectDNSStats: false
+clusterAgent:
+  enabled: true
+  replicas: 2
+  rbac:
+    create: true
+    serviceAccountName: default
+  metricsProvider:
+    enabled: true
+    createReaderRbac: true
+    useDatadogMetrics: true
+    service:
+      type: ClusterIP
+      port: 8443
+  admissionController:
+    enabled: true
+    mutateUnlabelled: false
+  resources: { }
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+agents:
+  rbac:
+    create: true
+    serviceAccountName: default
+clusterChecksRunner:
+  enabled: true
+  rbac:
+    create: true
+    serviceAccountName: default
+  replicas: 2
+providers:
+    aks:
+      enabled: true
